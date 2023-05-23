@@ -7,23 +7,29 @@ import CusTxtBtn from "./CusTxtBtn";
 import Login from "./Login";
 import APP_STRING from "../utils/constants";
 import actions from '../redux/actions'
+import ProcessCompleteAlert from "./ProcessCompleteAlert";
+import ErrorLoaderContainer from "./ErrorLoaderContainer";
 
 function Signup(props:any) {
 
     const [userData, setUserData] = useState({ firstName: '', lastName: '', email: '', password: '' });
     const [currentView, setCurrentView] = useState('signup');
     const [errorMsg, setErrorMessage ] = useState('');
+    const [isLoading, setLoading] = useState(false);
+    const [signupSuccess, setSignupSuccess] = useState(false);
 
     const handleSignup = (e: Event) => {
         if(userData.email && userData.password && userData.firstName && userData.lastName) {
             console.log(JSON.stringify(userData));
             actions.userSignup(userData);
+            setLoading(true);
         }
         e.stopPropagation();
     }
 
     const doLogin = () => {
         setCurrentView('login');
+        setSignupSuccess(false);
     }
 
     const handleInputChange = (e: any) => {
@@ -33,8 +39,10 @@ function Signup(props:any) {
     useEffect(()=>{
         let res = props.signupRes || {};
         if(res.user?.email) {
-            setCurrentView('login');
+            setLoading(false);
+            setSignupSuccess(true);
         } else if(res.user?.message) {
+            setLoading(false);
             setErrorMessage(res.user?.message);
         }
     }, [props.signupRes]);
@@ -90,13 +98,14 @@ function Signup(props:any) {
                 <CusButton
                     name={APP_STRING.SUBMIT}
                     onClick={handleSignup}
-                    style={{ marginBottom: 20 }}
-                    // type="submit"
+                    style={isLoading ? { marginBottom: 20, opacity: ".6" } : { marginBottom: 20 }}
+                    disabled={isLoading ? true : false}
                 />
 
-                {
-                    errorMsg && <div className="d-flex justify-content-center" style={{ marginTop: 20, marginBottom: 20, color: 'red' }}>{errorMsg}</div>
-                }
+               <ErrorLoaderContainer 
+                    errorMsg={errorMsg}
+                    isLoading={isLoading}
+               />
 
                 <CusTxtBtn
                     text={APP_STRING.LOGIN}
@@ -109,7 +118,13 @@ function Signup(props:any) {
 
     return (
         <>
-            {currentView == 'login' ? <Login /> : signupView()}
+            {currentView == 'login' ? <Login /> : !signupSuccess ? signupView() 
+            : 
+                <ProcessCompleteAlert 
+                    message={APP_STRING.SIGNUP_SUCCESS_MESSAGE} 
+                    actionBtnName="Login" 
+                    onClick={doLogin} 
+                />}
         </>
     )
 }

@@ -7,6 +7,7 @@ function CusButton(props: any) {
                 className={`w-100 p-1 ${Styles.cusButtonStyle} `}
                 onClick={props.onClick}
                 type={props.type}
+                disabled={props.disabled}
             >
                 {props.name}
             </button>

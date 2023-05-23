@@ -7,17 +7,23 @@ import CusTxtBtn from "./CusTxtBtn";
 import Signup from "./Signup";
 import APP_STRING from "../utils/constants";
 import actions from '../redux/actions'
+import { useRouter } from "next/router";
+import ErrorLoaderContainer from "./ErrorLoaderContainer";
 
 function Login(props:any) {
 
     const [userData, setUserData] = useState({ email: '', password: '' });
     const [currentView, setCurrentView] = useState('login');
     const [errorMsg, setErrorMessage] = useState('');
+    const [isLoading, setLoading] = useState(false);
+
+    const router = useRouter();
 
     const handleLogin = (e: Event) => {
         if(userData.email && userData.password) {
             console.log(JSON.stringify(userData));
             actions.userLogin(userData);
+            setLoading(true);
         }
         e.preventDefault();
         e.stopPropagation();
@@ -35,8 +41,11 @@ function Login(props:any) {
     useEffect(()=>{
         let res = props.userAuth;
         if(res.user?.token) {
+            setLoading(false);
             props.onCloseClick();
+            router.push('/dashboard');
         } else if(res.user?.message) {
+            setLoading(false);
             setErrorMessage(res.user?.message);
         }
     }, [props.userAuth]);
@@ -72,15 +81,17 @@ function Login(props:any) {
                     <CusButton
                         name={APP_STRING.SUBMIT}
                         type="submit"
+                        disabled={isLoading ? true : false}
                         onClick={handleLogin}
-                        style={{ marginBottom: 20 }}
+                        style={isLoading ? { marginBottom: 20, opacity: ".6" } : { marginBottom: 20 }}
                     />
 
                 </form>
 
-                {
-                    errorMsg && <div className="d-flex justify-content-center" style={{ marginTop: 20, marginBottom: 20, color: 'red' }}>{errorMsg}</div>
-                }
+                <ErrorLoaderContainer 
+                    errorMsg={errorMsg}
+                    isLoading={isLoading}
+               />
 
                 <CusTxtBtn
                     text="Signup"

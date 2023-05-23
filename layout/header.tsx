@@ -23,6 +23,11 @@ function Header(props:any) {
         setShowLogin(!showLogin);
     }
 
+    const closeLoginForm = () => {
+        setShowLogin(false);
+        actions.setUserLoginRequired(false);
+    }
+
     const handleLogout = () => {
         actions.userLogout();
     }
@@ -32,12 +37,14 @@ function Header(props:any) {
         if(res.user?.token) {
             setUserLoggedIn(true);
             setUserInfo(res.user);
-            router.push('/dashboard');
+            // if(!router.pathname.includes('dashboard') && router.pathname == "/") {
+            //     router.push('/dashboard');
+            // }
         }else{
             setUserInfo(defaultVal);
             setUserLoggedIn(false);
 
-            if(router.pathname.includes('dashboard')) {
+            if(router.pathname.includes('content')) {
                 router.push('/');
             }
         }
@@ -47,7 +54,7 @@ function Header(props:any) {
         <div className={`p-3 d-flex justify-content-between ${Styles.header}`}>
             <div>{APP_STRING.ONLINE_LEARNING_PLATFORM}</div>
             {!isUserLoggedIn && <CusTxtBtn text="Login" onClick={handleLogin} />}
-            {showLogin && createPortal(<ModalComponent modalName="Login" onCloseClick={handleLogin}><Login /></ModalComponent>, document.body)}
+            {(showLogin || props.loginRequired) && createPortal(<ModalComponent modalName="Login" onCloseClick={closeLoginForm}><Login /></ModalComponent>, document.body)}
             
             {isUserLoggedIn && <div className="d-flex">
                 <div>Hello { user.firstName }</div>
@@ -60,7 +67,8 @@ function Header(props:any) {
 }
 
 const mapStateToProps = (state:any) => ({
-    userAuth: state.userRes.userAuth
+    userAuth: state.userRes.userAuth,
+    loginRequired: state.userRes.loginRequired
   });
   
   

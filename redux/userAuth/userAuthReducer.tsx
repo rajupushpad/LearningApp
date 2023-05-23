@@ -1,10 +1,20 @@
-import {GET_USERS, USERS_ERROR, USER_LOGIN, USER_LOGIN_ERROR, USER_SIGNUP, USER_SIGNUP_ERROR, USER_LOGOUT} from '../types'
+import {
+        GET_USERS, 
+        USERS_ERROR, 
+        USER_LOGIN, 
+        USER_LOGIN_ERROR, 
+        USER_SIGNUP, 
+        USER_SIGNUP_ERROR, 
+        USER_LOGOUT,
+        USER_LOGIN_REQUIRED
+    } from '../types'
 
 const initialState = {
     users:[],
     loading:true,
     signup: {},
-    userAuth: {}
+    userAuth: {},
+    loginRequired: false
 }
 
 export default function userReducer(state = initialState, action:any){
@@ -55,6 +65,12 @@ export default function userReducer(state = initialState, action:any){
             ...state,
             loading: false, 
             userAuth: {} 
+        }
+
+        case USER_LOGIN_REQUIRED: 
+        return{
+            ...state,
+            loginRequired: action.payload.loginRequired
         }
 
         default: return state

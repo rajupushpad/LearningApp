@@ -1,5 +1,15 @@
-import { GET_USERS, USERS_ERROR, USER_LOGIN, USER_LOGIN_ERROR, USER_SIGNUP, USER_SIGNUP_ERROR, USER_LOGOUT } from '../types'
-import axios, { AxiosRequestConfig, AxiosResponse} from 'axios';
+import { 
+    GET_USERS, 
+    USERS_ERROR, 
+    USER_LOGIN, 
+    USER_LOGIN_ERROR, 
+    USER_SIGNUP, 
+    USER_SIGNUP_ERROR, 
+    USER_LOGOUT,
+    USER_LOGIN_REQUIRED
+} from '../types'
+import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
+import { APP_BACKEND_URL } from '../../utils/constants';
 
 export function getUsers(data: any) {
 
@@ -18,7 +28,6 @@ export function getUsers(data: any) {
             })
         }
     }
-
 }
 
 export function userLogin(data: any) {
@@ -27,14 +36,15 @@ export function userLogin(data: any) {
         try {
             const config: AxiosRequestConfig = {
                 method: 'post',
-                url: `http://localhost:5000/api/user/login`,
+                url: APP_BACKEND_URL + `/api/user/login`,
                 headers: {
-                  'Content-Type': 'application/json'
+                    'Content-Type': 'application/json'
                 },
                 data: data
-              };
-              const res: AxiosResponse = await axios(config);
-
+            };
+            const res: AxiosResponse = await axios(config);
+            sessionStorage.setItem('token', res.data.user.token );
+            
             dispatch({
                 type: USER_LOGIN,
                 payload: res.data
@@ -55,13 +65,13 @@ export function userSignup(data: any) {
         try {
             const config: AxiosRequestConfig = {
                 method: 'post',
-                url: `http://localhost:5000/api/user/signup`,
+                url: APP_BACKEND_URL + `/api/user/signup`,
                 headers: {
-                  'Content-Type': 'application/json'
+                    'Content-Type': 'application/json'
                 },
                 data: data
-              };
-              const res: AxiosResponse = await axios(config);
+            };
+            const res: AxiosResponse = await axios(config);
 
             dispatch({
                 type: USER_SIGNUP,
@@ -79,6 +89,8 @@ export function userSignup(data: any) {
 
 export function userLogout() {
 
+    sessionStorage.clear();
+    
     return async function (dispatch: any) {
         try {
 
@@ -95,3 +107,27 @@ export function userLogout() {
         }
     }
 }
+
+export function setUserLoginRequired(loginRequired: boolean) {
+
+    sessionStorage.clear();
+    
+    return async function (dispatch: any) {
+        try {
+
+            dispatch({
+                type: USER_LOGIN_REQUIRED,
+                payload: {loginRequired: loginRequired}
+            })
+        }
+        catch (error) {
+            dispatch({
+                type: USER_LOGIN_REQUIRED,
+                payload: {}
+            })
+        }
+    }
+}
+
+
+
