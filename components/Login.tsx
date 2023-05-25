@@ -10,14 +10,19 @@ import actions from '../redux/actions'
 import { useRouter } from "next/router";
 import ErrorLoaderContainer from "./ErrorLoaderContainer";
 
+type authDataType = {
+    email: string,
+    password: string
+}
+
 function Login(props:any) {
 
-    const [userData, setUserData] = useState({ email: '', password: '' });
-    const [currentView, setCurrentView] = useState('login');
-    const [errorMsg, setErrorMessage] = useState('');
-    const [isLoading, setLoading] = useState(false);
-
     const router = useRouter();
+
+    const [userData, setUserData] = useState<authDataType>({ email: '', password: '' });
+    const [currentView, setCurrentView] = useState<string>('login');
+    const [errorMsg, setErrorMessage] = useState<string>('');
+    const [isLoading, setLoading] = useState<boolean>(false);
 
     const handleLogin = (e: Event) => {
         if(userData.email && userData.password) {

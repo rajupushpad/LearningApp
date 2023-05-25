@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useLayoutEffect } from "react";
 import { connect } from "react-redux";
 import { useRouter } from "next/router";
 import { createPortal } from "react-dom";
@@ -11,22 +11,31 @@ import APP_STRING from "../../utils/constants";
 import AddCategory from "../../components/AddEditNewEntity/AddCategory";
 import ModalComponent from "../../components/Modal/ModalComponent";
 import EmptyContainer from "../../components/EmptyContainer";
-import actions from '../../redux/actions'
+import actions from '../../redux/actions';
+
+type categoryDataType = {
+    title: string;
+    description: string;
+    _id: string;
+}
+
+let defaultCatData = { title: '', description: '', _id: '' };
 
 function DashboardPage(props: any) {
 
     const router = useRouter();
 
-    const [height, setHeight] = useState(0);
-    const [showAddCategory, setShowAddCategoty] = useState(false);
-    const [categoryActionMode, setCategoryActionMode] = useState('add');
-    const [editedCatData, setEditedCatData] = useState({})
+    const [height, setHeight] = useState<number>(0);
+    const [showAddCategory, setShowAddCategoty] = useState<boolean>(false);
+    const [categoryActionMode, setCategoryActionMode] = useState<string>('add');
+    const [editedCatData, setEditedCatData] = useState<categoryDataType>(defaultCatData)
+
+    useLayoutEffect(() => {
+        setHeight(window.innerHeight);
+    }, []);
 
     useEffect(() => {
-
-        //call api to get categories
         actions.getCategories();
-        setHeight(window.innerHeight);
     }, []);
 
     const manageToShowAddEditCategory = (type: string, e: any, data?: any) => {
@@ -35,12 +44,12 @@ function DashboardPage(props: any) {
             setEditedCatData(data);
             e.stopPropagation();
         } else {
-            setEditedCatData({});
+            setEditedCatData(defaultCatData);
         }
         setShowAddCategoty(!showAddCategory);
     }
 
-    const handleCategoryClick = (id: number) => {
+    const handleCategoryClick = (id: string) => {
         router.push('/dashboard/category/' + id);
     }
 
@@ -55,12 +64,12 @@ function DashboardPage(props: any) {
                     />
                 </div>}
 
-                {props.categories.length > 0 && <div className="box">
+                {props.categoryRes.categories?.length > 0 && <div className="box">
                     {
-                        props.categories.map((category: any, index: number) => {
+                        props.categoryRes.categories?.map((category: categoryDataType, index: number) => {
                             return <CategoryTile
                                 category={category}
-                                key={category.id}
+                                key={category._id}
                                 onClick={() => handleCategoryClick(category._id)}
                                 showEdit={true}
                                 handleEditClick={manageToShowAddEditCategory}
@@ -69,7 +78,10 @@ function DashboardPage(props: any) {
                     }
                 </div>}
 
-                {props.categories.length == 0 && <div style={{ marginTop: 50 }}><EmptyContainer message={APP_STRING.NO_CATEGORIES} /></div>}
+                {props.categoryRes.categories?.length == 0 &&
+                    <div style={{ marginTop: 50 }}>
+                        <EmptyContainer message={APP_STRING.NO_CATEGORIES} />
+                    </div>}
 
                 {showAddCategory && createPortal(
                     <ModalComponent
@@ -86,7 +98,7 @@ function DashboardPage(props: any) {
 }
 
 const mapStateToProps = (state: any) => ({
-    categories: state.categoryRes?.categories || [],
+    categoryRes: state.categoryRes?.categories || {},
     userAuth: state.userRes.userAuth
 });
 

@@ -10,13 +10,20 @@ import actions from '../redux/actions'
 import ProcessCompleteAlert from "./ProcessCompleteAlert";
 import ErrorLoaderContainer from "./ErrorLoaderContainer";
 
+type userDataType = {
+    firstName: string,
+    lastName: string,
+    email: string,
+    password: string
+}
+
 function Signup(props:any) {
 
-    const [userData, setUserData] = useState({ firstName: '', lastName: '', email: '', password: '' });
-    const [currentView, setCurrentView] = useState('signup');
-    const [errorMsg, setErrorMessage ] = useState('');
-    const [isLoading, setLoading] = useState(false);
-    const [signupSuccess, setSignupSuccess] = useState(false);
+    const [userData, setUserData] = useState<userDataType>({ firstName: '', lastName: '', email: '', password: '' });
+    const [currentView, setCurrentView] = useState<string>('signup');
+    const [errorMsg, setErrorMessage ] = useState<string>('');
+    const [isLoading, setLoading] = useState<boolean>(false);
+    const [signupSuccess, setSignupSuccess] = useState<boolean>(false);
 
     const handleSignup = (e: Event) => {
         if(userData.email && userData.password && userData.firstName && userData.lastName) {

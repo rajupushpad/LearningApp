@@ -1,30 +1,29 @@
+import Link from 'next/link';
+
 import Syles from './layout.module.scss';
-import { useRouter } from 'next/router';
-import CusTxtBtn from '../components/CusTxtBtn';
+import APP_STRING from '../utils/constants';
 
 function Footer() {
 
-    const router = useRouter();
-
-    return(
+    return (
         <div className={`${Syles.footer} p-3 d-flex justify-content-between`}>
             <div>
-                <h3>Categories</h3> 
-                <div>11th</div> 
+                <h3>{APP_STRING.CATEGORIES}</h3>
+                <div>11th</div>
                 <div>12th</div>
                 <div>10th</div>
             </div>
 
             <div>
-                <h3>Join us</h3> 
-                <CusTxtBtn text="Become trainer" onClick={()=>{router.push('/become-trainer')}} />
-                <CusTxtBtn text="Sponser Us" onClick={()=>{router.push('/sponser-us')}} />
+                <h3>{APP_STRING.JOIN_US}</h3>
+                <Link href="/become-trainer">{APP_STRING.BECOME_TRAINER}</Link><br />
+                <Link href="/sponser-us">{APP_STRING.SPONSER_PAGE}</Link>
             </div>
 
             <div>
-                <h3>Support</h3> 
-                <CusTxtBtn text="FAQ" onClick={()=>{router.push('/faq')}} />
-                <CusTxtBtn text="Contact Us" onClick={()=>{router.push('/contact-us')}} />
+                <h3>{APP_STRING.SUPPORT}</h3>
+                <Link href="/faq">{APP_STRING.FAQ}</Link><br />
+                <Link href="/contact-us">{APP_STRING.CONTACT_US}</Link>
             </div>
         </div>
     )

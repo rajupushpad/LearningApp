@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useLayoutEffect } from "react";
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { connect } from "react-redux";
 import { useRouter } from "next/router";
@@ -10,29 +10,48 @@ import CategoryTile from "../components/Tiles/CategoryTile";
 import APP_STRING from "../utils/constants";
 import CourseTile from "../components/Tiles/CourseTile";
 
+type courseDataType = {
+    title: string;
+    description: string;
+    price: number;
+    _id: string;
+    categoryId: string;
+}
+
+type categoryDataType = {
+    title: string;
+    description: string;
+    _id: string;
+}
+
 function LandingPage(props: any) {
 
-    const [height, setHeight] = useState(0);
     const router = useRouter();
+    const [height, setHeight] = useState<number>(0);
+
+    useLayoutEffect(() => {
+        setHeight(window.innerHeight);
+    }, []);
 
     useEffect(() => {
-        setHeight(window.innerHeight);
         actions.getCategories();
         actions.getCourses();
-    }, [])
+    }, []);
 
-    const handleCategoryClick = (id: number) => {
+    const handleCategoryClick = (id: string) => {
         router.push('/dashboard/category/' + id);
     }
 
-    const viewCourseDetails = (item: any) => {
-        router.push({ pathname: '/dashboard/courses/' + item._id });
+    const viewCourseDetails = (id: string) => {
+        router.push({ pathname: '/dashboard/courses/' + id });
     }
 
     return (
         <Layout>
-            <div className="d-flex align-items-center flex-row pt-3 overflow-hidden flex-column" style={{ minHeight: height }}>
-
+            <div
+                className="d-flex align-items-center flex-row pt-3 overflow-hidden flex-column"
+                style={{ minHeight: height }}
+            >
                 <div className="p-3 w-100 custom-scroll">
                     <div><h4>{APP_STRING.CATEGORIES}</h4></div>
                     <InfiniteScroll
@@ -43,14 +62,13 @@ function LandingPage(props: any) {
                         loader={''}
                     >
                         {
-                            props.categoryRes.categories?.map((category: any, index: any) => {
-                                return <div style={{ marginLeft: 10 }} key={index}>
-                                    <CategoryTile
+                            props.categoryRes.categories?.map((category: categoryDataType, index: any) => {
+                                return <CategoryTile
+                                        key={category._id}
                                         category={category}
-                                        key={category.id}
                                         onClick={() => handleCategoryClick(category._id)}
                                         showEdit={false}
-                                    /></div>
+                                    />
                             })
                         }
                     </InfiniteScroll>
@@ -68,12 +86,13 @@ function LandingPage(props: any) {
                         loader={''}
                     >
                         {
-                            props.courseRes?.courses?.map((item: any, index: number) => {
-                                return <div style={{ marginLeft: 10 }} key={index}><CourseTile
+                            props.courseRes?.courses?.map((item: courseDataType, index: number) => {
+                                return <CourseTile
+                                key={item._id}
                                     course={item}
-                                    onClick={viewCourseDetails}
+                                    onClick={()=>viewCourseDetails(item._id)}
                                     showEdit={false}
-                                /></div>
+                                />
                             })
                         }
                     </InfiniteScroll>

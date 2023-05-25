@@ -38,12 +38,18 @@ function AddCourse(props: any) {
     }, []);
 
     useEffect(() => {
-        if (props.addCourse?.course?.title && isLoading) {
-            setLoading(false);
-            setIsCourseAdded(true);
-            setSuccessMsg(props.addCourse?.message);
-            actions.getSpecificCategory(router.query.id);
+        if(isLoading) {
+            if (props.addCourse?.course?.title) {
+                setLoading(false);
+                setIsCourseAdded(true);
+                setSuccessMsg(props.addCourse?.message);
+                actions.getSpecificCategory(router.query.id);
+            } else {
+                setErrorMessage(props.addCourse?.message);
+                setLoading(false);
+            }
         }
+       
     }, [props.addCourse]);
 
     const handleAddCourse = () => {

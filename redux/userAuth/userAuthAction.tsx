@@ -109,8 +109,6 @@ export function userLogout() {
 }
 
 export function setUserLoginRequired(loginRequired: boolean) {
-
-    sessionStorage.clear();
     
     return async function (dispatch: any) {
         try {

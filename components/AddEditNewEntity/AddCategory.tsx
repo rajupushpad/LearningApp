@@ -11,7 +11,7 @@ import ProcessCompleteAlert from "../ProcessCompleteAlert";
 type categoryDataType = {
     title: string;
     description: string;
-    _id?: number;
+    _id?: string;
 }
 
 function AddCategory(props: any) {
@@ -32,12 +32,22 @@ function AddCategory(props: any) {
     }, []);
 
     useEffect(() => {
-        if (props.addCategory?.category?.title && isLoading) {
-            setLoading(false);
-            setIsCategoryAdded(true);
-            setSuccessMsg(props.addCategory?.message);
-            actions.getCategories();
+        if(isLoading) {
+            if (props.addCategory?.category?.title) {
+                setLoading(false);
+                setIsCategoryAdded(true);
+                setSuccessMsg(props.addCategory?.message);
+                actions.getCategories();
+            } else {
+                setErrorMessage(props.addCategory.message);
+                setLoading(false);
+            }
         }
+
+        return () =>{
+           //
+        }
+       
     }, [props.addCategory]);
 
     const addNewCategory = () => {

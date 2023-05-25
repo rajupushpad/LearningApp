@@ -10,7 +10,7 @@ function CourseTile(props: any) {
     return (
         <div
             onClick={() => { props.onClick(course) }}
-            className="p-3 m-3 d-flex flex-row justify-content-between"
+            className="p-2 m-2 d-flex flex-row justify-content-between cursor-pointer"
             style={{ border: '1px solid black', minWidth: 400, minHeight: 200 }}
         >
             <div className="d-flex flex-row">

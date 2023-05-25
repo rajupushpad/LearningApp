@@ -1,34 +1,50 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useLayoutEffect } from "react";
 import { useRouter } from "next/router";
 import { connect } from "react-redux";
+import { createPortal } from "react-dom";
 
 import Layout from "../../../layout/layout";
 import CusButton from "../../../components/CusButton";
 import APP_STRING from "../../../utils/constants";
 import CourseTile from "../../../components/Tiles/CourseTile";
-import { createPortal } from "react-dom";
 import ModalComponent from "../../../components/Modal/ModalComponent";
 import AddNewCourse from "../../../components/AddEditNewEntity/AddCourse";
 import actions from "../../../redux/actions";
 import EmptyContainer from "../../../components/EmptyContainer";
 import ErrorLoaderContainer from "../../../components/ErrorLoaderContainer";
 
+type courseDataType = {
+    title: string;
+    description: string;
+    price: number;
+    _id: string;
+    categoryId: string;
+}
+
+let defaultCourseData = { title: '', description: '', price: 0, _id: '', categoryId: '' };
+
 function CategoryPage(props: any) {
 
-    const [height, setHeight] = useState(0);
-    const [showCourseModal, setShowCourseModal] = useState(false);
-    const [couseActionMode, setCouseActionMode] = useState('add');
-    const [editedCourseData, setEditedCourseData] = useState({ title: '', description: '', price: 0 });
-    const [isLoading, setIsLoding] = useState(false);
-    const [errorMsg, setErrorMsg] = useState('');
     const router = useRouter();
 
-    useEffect(() => {
+    const [height, setHeight] = useState<number>(0);
+    const [showCourseModal, setShowCourseModal] = useState<boolean>(false);
+    const [couseActionMode, setCouseActionMode] = useState<string>('add');
+    const [editedCourseData, setEditedCourseData] = useState<courseDataType>(defaultCourseData);
+    const [isLoading, setIsLoding] = useState<boolean>(false);
+    const [errorMsg, setErrorMsg] = useState<string>('');
+
+    useLayoutEffect(()=>{
         setHeight(window.innerHeight);
-        actions.getSpecificCategory(router.query.id);
-        setIsLoding(true);
-    }, []);
+    },[]);
+
+    useEffect(() => {
+        if(router.isReady) {
+            actions.getSpecificCategory(router.query.id);
+            setIsLoding(true);
+        }
+    }, [router.isReady]);
 
     useEffect(() => {
         if (isLoading) {
@@ -55,7 +71,7 @@ function CategoryPage(props: any) {
             setEditedCourseData(data);
             e.stopPropagation();
         } else {
-            setEditedCourseData({ title: '', description: '', price: 0 });
+            setEditedCourseData(defaultCourseData);
         }
         setShowCourseModal(!showCourseModal);
     }

@@ -12,8 +12,8 @@ import { useRouter } from "next/router";
 type contentDataType = {
     title: string;
     description: string;
-    _id?: number;
-    topicId: number,
+    _id?: string;
+    topicId: string,
     url: string,
     textContent?: string,
     pdfUrl?: string
@@ -21,7 +21,7 @@ type contentDataType = {
 
 function AddContent(props: any) {
 
-    const [contentData, setContentData] = useState<contentDataType>({title: '', description: '', url: '', textContent: '', topicId: 0});
+    const [contentData, setContentData] = useState<contentDataType>({title: '', description: '', url: '', textContent: '', topicId: ''});
     const [isLoading, setLoading] = useState<boolean>(false);
     const [isContentAdded, setIsContentAdded] = useState<boolean>(false);
     const [errorMsg, setErrorMessage] = useState<string>('');
@@ -47,11 +47,16 @@ function AddContent(props: any) {
     }, []);
 
     useEffect(() => {
-        if (props.addContent?.content?.title && isLoading) {
-            setLoading(false);
-            setIsContentAdded(true);
-            setSuccessMsg(props.addContent?.message);
-            actions.getSpecificContent(router.query.id);
+        if(isLoading) {
+            if (props.addContent?.content?.title) {
+                setLoading(false);
+                setIsContentAdded(true);
+                setSuccessMsg(props.addContent?.message);
+                actions.getSpecificContent(router.query.id);
+            } else {
+                setErrorMessage(props.addContent?.message);
+                setLoading(false);
+            }
         }
     }, [props.addContent]);
 

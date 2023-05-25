@@ -6,8 +6,8 @@ function CategoryTile(props: any) {
     return (
         <div onClick={() => props.onClick(category.id)}
             key={category.id}
-            className="d-flex justify-content-center align-items-center p-2 m-2 flex-column text-center overflow-hidden"
-            style={{ border: "1px solid black", height: 200, cursor: 'pointer', minWidth: 175 }}
+            className="d-flex justify-content-center align-items-center p-2 m-2 flex-column text-center overflow-hidden cursor-pointer"
+            style={{ border: "1px solid black", height: 200, minWidth: 175 }}
         >
             <div style={{ fontSize: 20, fontWeight: 'bold' }}>{category.title}</div>
             <div style={{ fontSize: 13 }}>{category.description}</div>

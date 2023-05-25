@@ -4,7 +4,7 @@ function ContentTile(props:any) {
     return (
         <div className="border d-flex justify-content-between p-4 flex-column">
             {props.content.videoUrl && <div className="d-flex">
-                <iframe width="420" height="300" src="http://www.youtube.com/embed/N6nik5jX2pA"></iframe>
+                <iframe width="420" height="300" src={props.content.videoUrl}></iframe>
             </div>}
 
             <div className="ml-3">

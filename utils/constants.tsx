@@ -67,7 +67,13 @@ const APP_STRING = {
     NO_COURSES: "No courses available, please add new course.",
     ADD_TOPIC_SUCCESS: "Topic added successfully",
     NO_CONTENT: "No content available, please add new content.",
-    CATEGORIES: "Categories"
+    CATEGORIES: "Categories",
+    BECOME_TRAINER: "Become trainer",
+    CONTACT_US: "Contact us",
+    FAQ: "Faq Page",
+    SPONSER_PAGE: "Sponser us",
+    JOIN_US: "Join us",
+    SUPPORT: "Support"
 }
 
 // export const APP_BACKEND_URL = 'https://learning-app-backend.onrender.com';

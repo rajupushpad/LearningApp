@@ -4,7 +4,7 @@ function VideoTile(props: any) {
     return (
         <div
             onClick={(e:any) => { props.onClick(e, video) }}
-            className="d-flex flex-row p-4"
+            className="d-flex flex-row p-4 cursor-pointer"
             style={{ border: '1px solid gray', marginRight: 20 }}
         >
             <div>

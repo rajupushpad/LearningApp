@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { connect } from "react-redux";
+import { useRouter } from "next/router";
 
 import APP_STRING from "../../utils/constants";
 import CusButton from "../CusButton";
@@ -7,7 +8,6 @@ import InputField from "../InputField";
 import ErrorLoaderContainer from "../ErrorLoaderContainer";
 import actions from "../../redux/actions";
 import ProcessCompleteAlert from "../ProcessCompleteAlert";
-import { useRouter } from "next/router";
 
 type topicDataType = {
     title: string;
@@ -37,12 +37,18 @@ function AddTopic(props: any) {
     }, []);
 
     useEffect(() => {
-        if (props.addTopic?.topic?.title && isLoading) {
-            setLoading(false);
-            setIsTopicAdded(true);
-            setSuccessMsg(props.addTopic?.message);
-            actions.getSpecificCourse(router.query.id);
+        if (isLoading) {
+            if (props.addTopic?.topic?.title) {
+                setLoading(false);
+                setIsTopicAdded(true);
+                setSuccessMsg(props.addTopic?.message);
+                actions.getSpecificCourse(router.query.id);
+            } else {
+                setErrorMessage(props.addCourse?.message);
+                setLoading(false);
+            }
         }
+
     }, [props.addTopic]);
 
     const addNewTopic = () => {

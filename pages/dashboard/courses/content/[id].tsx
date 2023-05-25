@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useLayoutEffect } from "react";
 import { connect } from "react-redux";
 import { useRouter } from "next/router";
 import { createPortal } from "react-dom";
@@ -11,18 +11,39 @@ import AddNewContent from "../../../../components/AddEditNewEntity/AddContent";
 import EditIcon from "../../../../asset/EditIcon";
 import actions from "../../../../redux/actions";
 
-function CouseContent(props: any) {
+type contentDataType = {
+    title: string;
+    description: string;
+    _id: string;
+    topicId: string,
+    url: string,
+    textContent?: string,
+    pdfUrl?: string
+}
 
-    const [height, setHeight] = useState(0);
-    const [showModalForAddVideoContent, setShowModalForAddVideoContent] = useState(false);
-    const [editedContentData, setEditedContentData] = useState({});
+const defaultContentData = { title: '', description: '', url: '', topicId: '', _id: '' };
+
+function CouseContent(props: any) {
 
     const router = useRouter();
 
-    useEffect(() => {
-        setHeight(window.innerHeight);
+    const [height, setHeight] = useState<number>(0);
+    const [showModalForAddVideoContent, setShowModalForAddVideoContent] = useState<boolean>(false);
+    const [editedContentData, setEditedContentData] = useState<contentDataType>(defaultContentData);
+
+    const getSpecificContent = useCallback(() => {
         actions.getSpecificContent(router.query.id);
+    }, [router.query.id]);
+
+    useLayoutEffect(() => {
+        setHeight(window.innerHeight);
     }, []);
+
+    useEffect(() => {
+        if (router.isReady) {
+            getSpecificContent()
+        }
+    }, [router.isReady]);
 
     const handleToShowModalForAddVideoContent = (data?: any) => {
         setShowModalForAddVideoContent(!showModalForAddVideoContent);
@@ -47,7 +68,6 @@ function CouseContent(props: any) {
                                 <EditIcon />
                             </div>
                         </div>
-                        <div>{video.description}</div>
                     </div>
                     <div className="d-flex w-100 justify-content-center">
                         <iframe width="600" height="420" src={props.courseRes.content?.url}></iframe>
@@ -79,18 +99,3 @@ const mapStateToProps = (state: any) => ({
 });
 
 export default connect(mapStateToProps)(CouseContent);
-
-const video = {
-
-    title: 'Introduction',
-    description: 'some description 1',
-    url: 'https://www.youtube.com/embed/7wnove7K-ZQ',
-    id: 1,
-    topicId: 1,
-    textcontent: '',
-    pdfUrl: '',
-    likes: '',
-    dislike: '',
-    watched: false,
-    watchCount: 1221
-}

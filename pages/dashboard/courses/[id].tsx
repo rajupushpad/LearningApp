@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useLayoutEffect } from "react";
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { useRouter } from "next/router";
 import { connect } from "react-redux";
@@ -17,33 +17,64 @@ import actions from "../../../redux/actions";
 import EmptyContainer from "../../../components/EmptyContainer";
 import ErrorLoaderContainer from "../../../components/ErrorLoaderContainer";
 
+type contentDataType = {
+    title: string;
+    description: string;
+    _id: string;
+    topicId: string,
+    url: string,
+    textContent?: string,
+    pdfUrl?: string
+}
+
+type topicDataType = {
+    title: string;
+    description: string;
+    _id: string;
+    courseId: string
+}
+
+const defaultContentData = { title: '', description: '', url: '', topicId: '', _id: '' };
+const defaultTopicData = {title: '', description: '', _id: '', courseId: ''};
+
 function CoursePage(props: any) {
 
     const router = useRouter();
 
-    const [height, setHeight] = useState(0);
-    const [showModalForAddTopic, setShowModalForAddTop] = useState(false);
-    const [showModalForAddVideoContent, setShowModalForAddVideoContent] = useState(false);
-    const [topicActionMode, setTopicActionMode] = useState('add');
-    const [editedTopicData, setEditedTopicData] = useState({});
-    const [topicsOfContent, setTopicOfContent] = useState({});
-    const [isLoading, setIsLoading] = useState(false);
+    const [height, setHeight] = useState<number>(0);
+    const [showModalForAddTopic, setShowModalForAddTop] = useState<boolean>(false);
+    const [showModalForAddVideoContent, setShowModalForAddVideoContent] = useState<boolean>(false);
+    const [topicActionMode, setTopicActionMode] = useState<string>('add');
+    const [editedTopicData, setEditedTopicData] = useState<topicDataType>(defaultTopicData);
+    const [topicsOfContent, setTopicOfContent] = useState<contentDataType>(defaultContentData);
+    const [isLoading, setIsLoading] = useState<boolean>(false);
 
-    useEffect(() => {
-        setHeight(window.innerHeight);
+    const getSpecificCourse = useCallback(() => {
         actions.getSpecificCourse(router.query.id);
-        setIsLoading(true);
+    }, [router.query.id]);
+
+    useLayoutEffect(() => {
+        setHeight(window.innerHeight);
     }, []);
 
     useEffect(() => {
+        if (router.isReady) {
+            getSpecificCourse()
+            setIsLoading(true);
+        }
+    }, [router.isReady]);
+
+    useEffect(() => {
         if (isLoading) {
-            if (props.courseRes.course?.title) {
-                setIsLoading(false);
-            } else if (props.courseRes?.message) {
+            if (props.courseRes.course?.title || props.courseRes?.message) {
                 setIsLoading(false);
             }
+
+            if (props.contentRes.content?.title) {
+                actions.getSpecificCourse(router.query.id);
+            }
         }
-    }, [props.courseRes]);
+    }, [props.courseRes, props.contentRes]);
 
     const viewContent = (event: any, video: any) => {
         if (props.userAuth.user?.token) {
@@ -62,7 +93,7 @@ function CoursePage(props: any) {
             setEditedTopicData(data);
             e.stopPropagation();
         } else {
-            setEditedTopicData({});
+            setEditedTopicData(defaultTopicData);
         }
         setShowModalForAddTop(!showModalForAddTopic);
     }
@@ -128,12 +159,12 @@ function CoursePage(props: any) {
                                         hasMore={false}
                                         loader={''}
                                     >
-                                        {item.contents.map((video: any, videoKey: string) => {
+                                        {item.contents.map((content: contentDataType, index: number) => {
                                             return (
                                                 <VideoTile
-                                                    video={video}
-                                                    key={video.id}
-                                                    onClick={(e: any) => viewContent(e, video)}
+                                                    video={content}
+                                                    key={content._id}
+                                                    onClick={(e: any) => viewContent(e, content)}
                                                 />
                                             )
                                         })}
@@ -180,7 +211,8 @@ function CoursePage(props: any) {
 
 const mapStateToProps = (state: any) => ({
     courseRes: state.courseRes.course || {},
-    userAuth: state.userRes.userAuth
+    userAuth: state.userRes.userAuth,
+    contentRes: state.contentRes.content
 });
 
 export default connect(mapStateToProps)(CoursePage);
