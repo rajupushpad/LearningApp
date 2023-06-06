@@ -1,3 +1,5 @@
+'use client';
+
 import { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import { useRouter } from "next/router";

@@ -1,15 +1,17 @@
 
-import { useState, useEffect, useCallback, useLayoutEffect } from "react";
+import { useState, useEffect, useCallback, lazy, Suspense } from "react";
 import { connect } from "react-redux";
 import { useRouter } from "next/router";
 import { createPortal } from "react-dom";
 
-import Layout from "../../../../layout/layout";
 import APP_STRING from "../../../../utils/constants";
-import ModalComponent from "../../../../components/Modal/ModalComponent";
-import AddNewContent from "../../../../components/AddEditNewEntity/AddContent";
 import EditIcon from "../../../../asset/EditIcon";
 import actions from "../../../../redux/actions";
+import SuspenseLoader from "../../../../components/Loaders/SuspenseLoader";
+import ErrorBoundary from "../../../../components/ErrorLoaderContainer/ErrorBoundary";
+
+const ModalComponent = lazy(() => import('../../../../components/Modal/ModalComponent'));
+const AddNewContent = lazy(() => import('../../../../components/AddEditNewEntity/AddContent'));
 
 type contentDataType = {
     title: string;
@@ -35,7 +37,7 @@ function CouseContent(props: any) {
         actions.getSpecificContent(router.query.id);
     }, [router.query.id]);
 
-    useLayoutEffect(() => {
+    useEffect(() => {
         setHeight(window.innerHeight);
     }, []);
 
@@ -51,7 +53,7 @@ function CouseContent(props: any) {
     }
 
     return (
-        <Layout>
+        <>
             <div className="p-4 w-100" style={{ minHeight: height }}>
                 <div className="w-100">
                     <div className="d-flex flex-column">
@@ -81,16 +83,20 @@ function CouseContent(props: any) {
 
             {
                 showModalForAddVideoContent && createPortal(
-                    <ModalComponent
-                        mode={'edit'}
-                        onCloseClick={handleToShowModalForAddVideoContent}
-                        editedContentData={editedContentData}
-                    >
-                        <AddNewContent />
-                    </ModalComponent>, document.body
+                    <ErrorBoundary>
+                        <Suspense fallback={<SuspenseLoader />}>
+                            <ModalComponent
+                                mode={'edit'}
+                                onCloseClick={handleToShowModalForAddVideoContent}
+                                editedContentData={editedContentData}
+                            >
+                                <AddNewContent />
+                            </ModalComponent>
+                        </Suspense>
+                    </ErrorBoundary>, document.body
                 )
             }
-        </Layout>
+        </>
     )
 }
 

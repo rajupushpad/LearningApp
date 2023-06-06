@@ -1,21 +1,23 @@
 
-import { useState, useEffect, useCallback, useLayoutEffect } from "react";
+import { useState, useEffect, useCallback, lazy, Suspense } from "react";
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { useRouter } from "next/router";
 import { connect } from "react-redux";
 import { createPortal } from "react-dom";
 
-import Layout from "../../../layout/layout";
-import CusButton from "../../../components/CusButton";
-import VideoTile from "../../../components/Tiles/VideoTile";
 import APP_STRING from "../../../utils/constants";
-import ModalComponent from "../../../components/Modal/ModalComponent";
-import AddTopic from "../../../components/AddEditNewEntity/AddTopic";
-import AddNewContent from "../../../components/AddEditNewEntity/AddContent";
 import EditIcon from "../../../asset/EditIcon";
 import actions from "../../../redux/actions";
-import EmptyContainer from "../../../components/EmptyContainer";
-import ErrorLoaderContainer from "../../../components/ErrorLoaderContainer";
+import SuspenseLoader from "../../../components/Loaders/SuspenseLoader";
+import ErrorBoundary from "../../../components/ErrorLoaderContainer/ErrorBoundary";
+
+const AddTopic = lazy(() => import('../../../components/AddEditNewEntity/AddTopic'));
+const ModalComponent = lazy(() => import('../../../components/Modal/ModalComponent'));
+const CusButton = lazy(() => import('../../../components/CusButton'));
+const VideoTile = lazy(() => import('../../../components/Tiles/VideoTile'));
+const EmptyContainer = lazy(() => import('../../../components/EmptyContainer'));
+const AddNewContent = lazy(() => import('../../../components/AddEditNewEntity/AddContent'));
+const ErrorLoaderContainer = lazy(() => import('../../../components/ErrorLoaderContainer'));
 
 type contentDataType = {
     title: string;
@@ -35,7 +37,7 @@ type topicDataType = {
 }
 
 const defaultContentData = { title: '', description: '', url: '', topicId: '', _id: '' };
-const defaultTopicData = {title: '', description: '', _id: '', courseId: ''};
+const defaultTopicData = { title: '', description: '', _id: '', courseId: '' };
 
 function CoursePage(props: any) {
 
@@ -53,7 +55,7 @@ function CoursePage(props: any) {
         actions.getSpecificCourse(router.query.id);
     }, [router.query.id]);
 
-    useLayoutEffect(() => {
+    useEffect(() => {
         setHeight(window.innerHeight);
     }, []);
 
@@ -104,108 +106,140 @@ function CoursePage(props: any) {
     }
 
     return (
-        <Layout>
-            <div className="p-4 w-100" style={{ minHeight: height }}>
-                {!isLoading && <div className="w-100">
-                    <div className="d-flex justify-content-between">
-                        <div>
-                            <h4>{APP_STRING.COURSE_NAME} : {props.courseRes.course?.title}</h4>
-                            <h5>{APP_STRING.COURSE_DESCRIPTION} : {props.courseRes.course?.description}</h5>
-                        </div>
-
-                        {props.userAuth.user?.token && <div className="d-flex justify-content-between">
-                            <CusButton
-                                name={APP_STRING.ADD_NEW_TOPIC}
-                                onClick={(e: any) => handleToShowModalForAddTopic('add', e)}
-                            />
-                        </div>}
+        <div className="p-4 w-100" style={{ minHeight: height }}>
+            {!isLoading && <div className="w-100">
+                <div className="d-flex justify-content-between">
+                    <div>
+                        <h4>{APP_STRING.COURSE_NAME} : {props.courseRes.course?.title}</h4>
+                        <h5>{APP_STRING.COURSE_DESCRIPTION} : {props.courseRes.course?.description}</h5>
                     </div>
-                    <h5>{APP_STRING.VIDEOS}: </h5>
-                    {
-                        props.courseRes.topics && props.courseRes.topics.map((item: any, index: any) => {
-                            return (
-                                <div key={index} className="p-3 m-3 d-flex flex-column" style={{ border: '1px solid black' }}>
 
-                                    <div className="m-3">
-                                        <div className="d-flex justify-content-between">
-                                            <h2>
-                                                {item.title}
-                                            </h2>
+                    {props.userAuth.user?.token && <div className="d-flex justify-content-between">
+                        <ErrorBoundary>
+                            <Suspense fallback={<SuspenseLoader />}>
+                                <CusButton
+                                    name={APP_STRING.ADD_NEW_TOPIC}
+                                    onClick={(e: any) => handleToShowModalForAddTopic('add', e)}
+                                />
+                            </Suspense>
+                        </ErrorBoundary>
 
-                                            {props.userAuth.user?.token && <div className="d-flex justify-content-between align-items-center">
-                                                <div
-                                                    onClick={(e: any) => handleToShowModalForAddTopic('edit', e, item)}
-                                                    style={{ marginRight: 20 }}
-                                                    className="cursor-pointer"
-                                                >
-                                                    <EditIcon />
-                                                </div>
-
-                                                <CusButton
-                                                    name={APP_STRING.ADD_NEW_VIDEO}
-                                                    onClick={(e: any) => handleToShowModalForAddVideoContent(item)}
-                                                />
-                                            </div>}
-                                        </div>
-
-                                        <div>
-                                            {item.description}
-                                        </div>
-                                    </div>
-                                    {item?.contents && <InfiniteScroll
-                                        className="w-100 d-flex flex-row"
-                                        dataLength={item.contents.length ? item.contents.length : 0}
-                                        next={() => { }}
-                                        hasMore={false}
-                                        loader={''}
-                                    >
-                                        {item.contents.map((content: contentDataType, index: number) => {
-                                            return (
-                                                <VideoTile
-                                                    video={content}
-                                                    key={content._id}
-                                                    onClick={(e: any) => viewContent(e, content)}
-                                                />
-                                            )
-                                        })}
-                                    </InfiniteScroll>}
-                                </div>
-                            )
-                        })
-                    }
-
-                    {!isLoading && (!props.courseRes?.topics || props.courseRes.topics.length == 0) && <div style={{ marginTop: 50 }}><EmptyContainer message={APP_STRING.NO_CONTENT} /></div>}
-
-                </div>}
-                {isLoading &&
-                    <div className="d-flex align-items-center justify-content-center" style={{ height: 500 }}>
-                        <ErrorLoaderContainer isLoading={isLoading} /><br />
                     </div>}
+                </div>
+                <h5>{APP_STRING.VIDEOS}: </h5>
                 {
-                    showModalForAddTopic && createPortal(
-                        <ModalComponent
-                            mode={topicActionMode}
-                            onCloseClick={handleToShowModalForAddTopic}
-                            editedTopicData={editedTopicData}
-                        >
-                            <AddTopic />
-                        </ModalComponent>, document.body
-                    )
+                    props.courseRes.topics ? props.courseRes.topics.map((item: any, index: any) => {
+                        return (
+                            <div key={index} className="p-3 m-3 d-flex flex-column" style={{ border: '1px solid black' }}>
+
+                                <div className="m-3">
+                                    <div className="d-flex justify-content-between">
+                                        <h2>
+                                            {item.title}
+                                        </h2>
+
+                                        {props.userAuth.user?.token && <div className="d-flex justify-content-between align-items-center">
+                                            <div
+                                                onClick={(e: any) => handleToShowModalForAddTopic('edit', e, item)}
+                                                style={{ marginRight: 20 }}
+                                                className="cursor-pointer"
+                                            >
+                                                <EditIcon />
+                                            </div>
+
+                                            <ErrorBoundary>
+                                                <Suspense fallback={<SuspenseLoader />}>
+                                                    <CusButton
+                                                        name={APP_STRING.ADD_NEW_VIDEO}
+                                                        onClick={(e: any) => handleToShowModalForAddVideoContent(item)}
+                                                    />
+                                                </Suspense>
+                                            </ErrorBoundary>
+                                        </div>}
+                                    </div>
+
+                                    <div>
+                                        {item.description}
+                                    </div>
+                                </div>
+                                {item?.contents && <InfiniteScroll
+                                    className="w-100 d-flex flex-row"
+                                    dataLength={item.contents.length ? item.contents.length : 0}
+                                    next={() => { }}
+                                    hasMore={false}
+                                    loader={''}
+                                >
+                                    {item.contents.map((content: contentDataType, index: number) => {
+                                        return (
+                                            <ErrorBoundary key={content._id}>
+                                                <Suspense fallback={<SuspenseLoader />}>
+                                                    <VideoTile
+                                                        video={content}
+                                                        onClick={(e: any) => viewContent(e, content)}
+                                                    />
+                                                </Suspense>
+                                            </ErrorBoundary>
+
+
+                                        )
+                                    })}
+                                </InfiniteScroll>}
+                            </div>
+                        )
+                    }) : <></>
                 }
 
-                {
-                    showModalForAddVideoContent && createPortal(
-                        <ModalComponent
-                            mode={'add'}
-                            onCloseClick={handleToShowModalForAddVideoContent}
-                            editedContentData={topicsOfContent}
-                        >
-                            <AddNewContent />
-                        </ModalComponent>, document.body
-                    )
-                }
-            </div>
-        </Layout>
+                {!isLoading &&
+                    (!props.courseRes?.topics || props.courseRes.topics.length == 0) &&
+                    <div style={{ marginTop: 50 }}>
+                        <ErrorBoundary>
+                            <Suspense fallback={<SuspenseLoader />}>
+                                <EmptyContainer message={APP_STRING.NO_CONTENT} />
+                            </Suspense>
+                        </ErrorBoundary>
+                    </div>}
+
+            </div>}
+            {isLoading &&
+                <div className="d-flex align-items-center justify-content-center" style={{ height: 500 }}>
+                    <ErrorBoundary>
+                        <Suspense fallback={<SuspenseLoader />}>
+                            <ErrorLoaderContainer isLoading={isLoading} /><br />
+                        </Suspense>
+                    </ErrorBoundary>
+                </div>}
+            {
+                showModalForAddTopic && createPortal(
+                    <ErrorBoundary>
+                        <Suspense>
+                            <ModalComponent
+                                mode={topicActionMode}
+                                onCloseClick={handleToShowModalForAddTopic}
+                                editedTopicData={editedTopicData}
+                            >
+                                <AddTopic />
+                            </ModalComponent>
+                        </Suspense>
+                    </ErrorBoundary>, document.body
+                )
+            }
+
+            {
+                showModalForAddVideoContent && createPortal(
+                    <ErrorBoundary>
+                        <Suspense>
+                            <ModalComponent
+                                mode={'add'}
+                                onCloseClick={handleToShowModalForAddVideoContent}
+                                editedContentData={topicsOfContent}
+                            >
+                                <AddNewContent />
+                            </ModalComponent>
+                        </Suspense>
+                    </ErrorBoundary>, document.body
+                )
+            }
+        </div>
     )
 }
 

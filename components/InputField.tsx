@@ -15,6 +15,7 @@ function InputField(props: any) {
                         value={props.value}
                         rows={props.rows}
                         cols={props.cols}
+                        disabled={props.disabled}
                     />
                     :
                     <input
@@ -30,6 +31,7 @@ function InputField(props: any) {
                         pattern={props.pattern}
                         id={props.id}
                         value={props.value}
+                        disabled={props.disabled}
                     />
             }
 

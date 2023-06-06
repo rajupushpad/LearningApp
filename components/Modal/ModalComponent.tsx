@@ -1,3 +1,5 @@
+'use client';
+
 import React from "react";
 
 import modalStyle from "./modalComponent.module.scss";

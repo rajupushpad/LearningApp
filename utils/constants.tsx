@@ -73,7 +73,9 @@ const APP_STRING = {
     FAQ: "Faq Page",
     SPONSER_PAGE: "Sponser us",
     JOIN_US: "Join us",
-    SUPPORT: "Support"
+    SUPPORT: "Support",
+    ONLINE_LEARNING_APP: "Online learning app",
+    ONLINE_LEARNING_APP_DESC: "Learn by fun"
 }
 
 // export const APP_BACKEND_URL = 'https://learning-app-backend.onrender.com';
